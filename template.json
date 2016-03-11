@@ -1,0 +1,68 @@
+{
+    "variables": {
+        "version": "2.0.8",
+        "box_name": "youtily/centos7",
+        "box_description": "Install Xvfb for running headless GUI tests",
+        "atlas_token": "{{env `ATLAS_TOKEN`}}"
+    },
+    "provisioners": [{
+        "type": "shell",
+        "execute_command": "echo 'vagrant'|sudo -S sh '{{.Path}}'",
+        "override": {
+            "virtualbox-iso": {
+                "scripts": [
+                    "scripts/base.sh",
+                    "scripts/vagrant.sh",
+                    "scripts/virtualbox.sh",
+                    "scripts/createdev.sh",
+                    "scripts/env.sh",
+                    "scripts/cleanup.sh"
+                ]
+            }
+        }
+    }],
+    "post-processors": [
+        [{
+            "type": "vagrant",
+            "keep_input_artifact": false
+        }, {
+            "type": "atlas",
+            "token": "{{user `atlas_token`}}",
+            "only": ["virtualbox-iso"],
+            "artifact": "{{user `box_name`}}",
+            "artifact_type": "vagrant.box",
+            "metadata": {
+                "provider": "virtualbox",
+                "created_at": "{{timestamp}}",
+                "version": "{{user `version`}}",
+                "name": "{{user `box_name`}}",
+                "description": "{{user `box_description`}}"
+            }
+        }]
+    ],
+    "builders": [{
+        "type": "virtualbox-iso",
+        "boot_command": [
+            "<tab> text ks=http://{{ .HTTPIP }}:{{ .HTTPPort }}/ks.cfg<enter><wait>"
+        ],
+        "boot_wait": "10s",
+        "disk_size": 40520,
+        "guest_os_type": "RedHat_64",
+        "http_directory": "http",
+        "iso_checksum": "88c0437f0a14c6e2c94426df9d43cd67",
+        "iso_checksum_type": "md5",
+        "iso_url": "http://centos.host-engine.com/7/isos/x86_64/CentOS-7-x86_64-Minimal-1511.iso",
+        "ssh_username": "vagrant",
+        "ssh_password": "vagrant",
+        "ssh_port": 22,
+        "ssh_pty": true,
+        "ssh_wait_timeout": "10000s",
+        "shutdown_command": "echo 'vagrant' | sudo -S shutdown -P now",
+        "guest_additions_path": "VBoxGuestAdditions_{{.Version}}.iso",
+        "virtualbox_version_file": ".vbox_version",
+        "vboxmanage": [
+            ["modifyvm", "{{.Name}}", "--memory", "2048"],
+            ["modifyvm", "{{.Name}}", "--cpus", "2"]
+        ]
+    }]
+}
