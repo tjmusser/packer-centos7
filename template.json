@@ -1,7 +1,7 @@
 {
     "variables": {
         "version": "2.0.8",
-        "box_name": "youtily/centos7",
+        "box_name": "PaeanOfApollo/centos7",
         "box_description": "Install Xvfb for running headless GUI tests",
         "atlas_token": "{{env `ATLAS_TOKEN`}}"
     },
